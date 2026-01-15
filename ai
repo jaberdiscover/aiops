@@ -1,0 +1,258 @@
+# Azure KPI Thresholds – Senior SRE (12+ Years) Recommendations
+
+This document lists **clear, actionable changes** you can apply directly to the Excel workbook. It is structured so you can **update the sheets without ambiguity**.
+
+---
+
+## 1. Global Changes (Apply to ALL Sheets)
+
+### 1.1 Add a New Column: **Alert Type**
+
+**Column name:** `Alert Type`
+
+**Allowed values (standardized):**
+
+* `Incident`
+* `Capacity`
+* `Signal`
+
+**Definition:**
+
+* **Incident** – User-impacting, requires immediate response (P1/P2)
+* **Capacity** – Risk indicator, requires scaling or planned action
+* **Signal** – Informational, trend or diagnostic only
+
+---
+
+### 1.2 (Optional but Recommended) Add Ownership Column
+
+**Column name:** `Resolver Group / Service Owner`
+
+Purpose:
+
+* Reduces MTTR
+* Prevents ticket bouncing
+* Enables ServiceNow auto-routing
+
+---
+
+### 1.3 (Optional) Add Automation Readiness Column
+
+**Column name:** `Automation Ready`
+
+Values:
+
+* `Yes` – Safe for OO / auto-remediation
+* `No` – Human decision required
+
+---
+
+## 2. SQL_DB Sheet Recommendations
+
+### Incident Alerts (Keep as-is, add Alert Type)
+
+Set **Alert Type = Incident** for:
+
+* Availability %
+* Connection Failed
+* Deadlock Count
+* Failed Connections (System/User)
+* Blocked by Firewall
+* CPU / DTU / DWU Limit Exceeded
+
+---
+
+### Capacity Alerts
+
+Set **Alert Type = Capacity** for:
+
+* CPU Percentage
+* DTU Consumption %
+* Log IO Percentage
+* Data IO Percentage
+* Storage Used %
+
+**Enhancement to threshold text:**
+Add:
+
+> "OR deviation >30% from 7-day baseline"
+
+---
+
+### Signal Alerts
+
+Set **Alert Type = Signal** for:
+
+* Sessions Count
+
+Reason:
+
+* Useful for diagnosing overload vs underutilization
+* Not a user-impacting signal by itself
+
+---
+
+## 3. SQL_MI Sheet Recommendations
+
+### Incident Alerts
+
+Set **Alert Type = Incident** for:
+
+* Availability-related request failures
+
+---
+
+### Capacity Alerts
+
+Set **Alert Type = Capacity** for:
+
+* CPU Usage %
+* IO Bytes Read
+* IO Bytes Written
+* Storage Space Used
+
+**Threshold enhancement:**
+
+* Ensure all are **sustained for 10–15 minutes**
+
+---
+
+### Add New KPI (Recommended)
+
+Add a row:
+
+* **KPI Category:** Availability
+* **KPI Name:** Storage IO Latency
+* **Metric Name:** io_latency
+* **Threshold:** p95 latency deviation from baseline
+* **Alert Type:** Incident
+
+---
+
+## 4. APIM Sheet Recommendations
+
+### Incident Alerts
+
+Set **Alert Type = Incident** for:
+
+* API Latency p95
+* Backend Latency p95
+* API Error Count
+* Request Count drop
+
+---
+
+### Capacity Alerts
+
+Set **Alert Type = Capacity** for:
+
+* APIM Capacity
+
+**Threshold note:**
+
+> "Capacity >80% sustained = scale action, not incident"
+
+---
+
+### Add New KPI (Strongly Recommended)
+
+Add a row:
+
+* **KPI Category:** Saturation
+* **KPI Name:** Throttled Requests
+* **Metric Name:** ThrottledRequests
+* **Threshold:** >0 sustained
+* **Alert Type:** Incident
+
+---
+
+## 5. Azure_Functions Sheet Recommendations
+
+### Incident Alerts (Symptoms)
+
+Set **Alert Type = Incident** for:
+
+* Function Failures (5xx)
+* Failed Requests
+* Request Count drop
+
+---
+
+### Capacity Alerts (Causes)
+
+Set **Alert Type = Capacity** for:
+
+* Memory Working Set
+* Scaling Instance Count (approaching max)
+
+---
+
+### Signal Alerts
+
+Set **Alert Type = Signal** for:
+
+* Queue Backlog
+
+---
+
+### Add New KPI (Recommended)
+
+Add a row:
+
+* **KPI Category:** Latency
+* **KPI Name:** Execution Duration
+* **Metric Name:** ExecutionDuration
+* **Threshold:** p95 deviation from baseline
+* **Alert Type:** Incident
+
+Reason:
+
+* Detects cold start and execution delays
+
+---
+
+## 6. ACR Sheet Recommendations
+
+### Incident Alerts
+
+Set **Alert Type = Incident** for:
+
+* Pull Failure Rate
+* Push Failure Rate
+
+---
+
+### Capacity Alerts
+
+Set **Alert Type = Capacity** for:
+
+* Registry CPU Load
+* Storage Used
+
+---
+
+### Threshold Text Enhancement
+
+For Pull/Push failures, add:
+
+> "Validate dependency: Network / Identity / Storage"
+
+---
+
+## 7. Why These Changes Matter (Use in Review)
+
+* Prevents alert fatigue
+* Aligns metrics with operational intent
+* Enables ServiceNow ITOM correlation
+* Makes automation safe and predictable
+* Separates symptoms from causes
+
+---
+
+## 8. One-Line Executive Explanation
+
+> "Alert Type defines whether a metric breach should create an incident, trigger capacity action, or simply be observed — turning monitoring into operationally mature ITOM."
+
+---
+
+**This document can be used directly to update the Excel sheets row by row.**
